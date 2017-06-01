@@ -6,7 +6,7 @@
 #    By: gderenzi <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2017/02/28 19:09:15 by gderenzi          #+#    #+#              #
-#    Updated: 2017/05/31 11:55:39 by gderenzi         ###   ########.fr        #
+#    Updated: 2017/05/31 12:05:54 by gderenzi         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,8 +15,8 @@ CC			= gcc
 CFLAGS		= -Wall -Werror -Wextra
 CFLAGS		+= -I includes/ -I libft/includes -I mlx/ 
 LDFLAGS		:= -L libft/ -lft -L mlx/ -lmlx -framework OpenGL -framework AppKit
-SRC			= main.c #\
-			  #init.c \
+SRC			= main.c \
+			  init.c #\
 			  #draw.c \
 			  #color.c \
 			  #key_hook.c \

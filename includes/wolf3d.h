@@ -6,7 +6,7 @@
 /*   By: gderenzi <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/05/30 15:11:31 by gderenzi          #+#    #+#             */
-/*   Updated: 2017/05/30 16:08:44 by gderenzi         ###   ########.fr       */
+/*   Updated: 2017/05/31 14:25:22 by gderenzi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,10 @@
 # define QUIT = KEY_ESC
 # define MOVE_UP = KEY_W
 # define MOVE_DOWN = KEY_S
-# define TURN_LEFT = KEY_A
-# define TURN_RIGHT = KEY_D
+# define MOVE_LEFT = KEY_A
+# define MOVE_RIGHT = KEY_D
+# define TURN_LEFT = KEY_LEFT
+# define TURN_RIGHT = KEY_RIGHT
 
 typedef struct		s_point
 {
