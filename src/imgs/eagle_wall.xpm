@@ -1,0 +1,126 @@
+static char	*eagle_wall[] = {
+"64 64 60 1",
+" 	c #000000", /*  0 */
+".	c #383838", /*  1 */
+"+	c #545454", /*  2 */
+"@	c #484848", /*  3 */
+"#	c #EC0000", /*  4 */
+"$	c #D40000", /*  5 */
+"%	c #A40000", /*  6 */
+"&	c #E00000", /*  7 */
+"*	c #C80000", /*  8 */
+"=	c #BC0000", /*  9 */
+"-	c #B00000", /* 10 */
+";	c #880000", /* 11 */
+">	c #640000", /* 12 */
+",	c #2C2C2C", /* 13 */
+"'	c #7C0000", /* 14 */
+")	c #980000", /* 15 */
+"!	c #700000", /* 16 */
+"~	c #580000", /* 17 */
+"{	c #400000", /* 18 */
+"]	c #4C0000", /* 19 */
+"^	c #202020", /* 20 */
+"/	c #5C5C5C", /* 21 */
+"(	c #646464", /* 22 */
+"_	c #404040", /* 23 */
+":	c #343434", /* 24 */
+"<	c #4C4C4C", /* 25 */
+"[	c #303030", /* 26 */
+"}	c #FCF400", /* 27 */
+"|	c #E4D800", /* 28 */
+"1	c #CCC400", /* 29 */
+"2	c #848400", /* 30 */
+"3	c #B4B4B4", /* 31 */
+"4	c #706C00", /* 32 */
+"5	c #A86840", /* 33 */
+"6	c #9C9C00", /* 34 */
+"7	c #585400", /* 35 */
+"8	c #707070", /* 36 */
+"9	c #7C7C7C", /* 37 */
+"0	c #E88C58", /* 38 */
+"a	c #543C1C", /* 39 */
+"b	c #989898", /* 40 */
+"c	c #FC2020", /* 41 */
+"d	c #FC0000", /* 42 */
+"e	c #C0C0C0", /* 43 */
+"f	c #A8A8A8", /* 44 */
+"g	c #D0D0D0", /* 45 */
+"h	c #8C8C8C", /* 46 */
+"i	c #6C0070", /* 47 */
+"j	c #580058", /* 48 */
+"k	c #600064", /* 49 */
+"l	c #500050", /* 50 */
+"m	c #B45400", /* 51 */
+"n	c #CC6000", /* 52 */
+"o	c #FC7800", /* 53 */
+"p	c #480048", /* 54 */
+"q	c #FC8820", /* 55 */
+"r	c #840084", /* 56 */
+"s	c #400040", /* 57 */
+"t	c #9C009C", /* 58 */
+"u	c #744C28", /* 59 */
+"................................................................",
+"+.+@@@@@+@@@@@@+@.@@@@@@@++++++@@@@@@@@@+++++++@@@@...@@++@@@@@.",
+".##$$$$$$$$$%@@+##$$$$$$$$$$$$$$$$$$%@.+####&&&&&&$$$$$****===%@",
+"@}*--$;%$;*%>,@+#=;=;=;='=)=)='='=*%!,@.$%*-*--*!*'*-*;*%'*)*%},",
+"|123333333333333333333333333333333333333333333333333333333333114",
+"5678899999999999999999999999999999999999999999999999999999888407",
+"@a%9999bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb9899~5,",
+"@='b9c%{{+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!%-d&9{{{9e8~{,",
+"@=%f9%eb8{9fegee33333333333333333333333333333333eeeee9{98bc98~{,",
+"@'>3b{beb9hbffh9fge3333333333333333333333333333hi(e3fff8fg%89{{,",
+"@@,gf{bfeb99bb+j8fggee3333333333333333333333eeh(klbffbbfg9{9b^^,",
+"+..g3+8b3eb99hljjj9fgeeeee33l8+llllmno3333eeh(kjllbbbbfge(+hf^,,",
+"#$$3g{9bf3eb8(@plljj9f333333lllll9lmmnq333h(kjlll@bbbfeef9{bf~~$",
+"-;;3g!bhbf3(j8(@pplljjj9h3338llllllmh33h(kkjjlll@88l(fefh9{f3~~-",
+";%;3g-fbhb(ik@8(@pppprjjj8h33llllllh3h(kkjrlllp@8+ikk(fb9h!f3~~)",
+"!%%33)3bhhpkikj@(@.ppipjjjj33llllll33jkkjlipp.@(@lkkiibh9h!f3~~'",
+"%;;33;efbhppkikkj@+.sspppj+33llllll33+pppppp.@@pljkiiih9hh!f3~~'",
+"!%>33!g3fb@ppkiikjpsssspph338llllll833hpppsssppljkiii+h9hb!33~~;",
+"!->33!ge3b(@pjkkikjisssphl83llllllll38phpsspjppjkiii+99hhf!33~~!",
+"{]]33!gg(l8++@jkkijrlssplpl33llllll33ppppppjiljkki+9(@@(bf!33{~{",
+",,,33!3gjlp@+++@kkijrlllplp9(llllll(9ppppppijjkk+h9(@sspbf!33^^,",
+"++@33!3gkjlpps.@@+(jjjjpppllllllllllppppppllj+(h9+lpssspff!33^,,",
+"+##ee'e3kkllpsssppjtjjjpplllllllllllpppppljjtjjjllpssssjff!33~~,",
+"+#;gg)gejkjlppssspprjjjllllllllllllllpplljjjtjjjlppssspjbf'33~{,",
+".#-ee;eb8jkllpsspspijjllllll++(88(++llljjjjjrjjlppssssp8bf'33~{,",
+"@=>33'3bb8@jlppplpljilllllll(itiiti(lljjjjjrjjlpppsss@8bb3;33~{,",
+"@=-33!3lj@(88((+@_[pljrjllll9tiiiit9ljljjrjjj++@_._@+(@kie)ee~{,",
+"+=!ff!flljjjjlplplplpljrilll+iiiiii+lljirjjjjlppppsppljkig)gg~{,",
+"@*%ff>fllljjjllplplpllllllll9tiiiit9ljljljjjlpppppppljjkke)ee~{,",
+"@%)bb]blljljljllllllllllllll+it@iti+lljljjjllpppppppllkike;ee~{,",
+"@@.ff~fllljljllllll+llll+lll9+i@ii+9ljl+jlll+pppppppllkkp3'33^^,",
+"+++ff>f(llllllll@8lllll+llll+99++99+lllj+llplp8@ppplljkj(3!33^,,",
+"===33!3b(llll@88llllll8lllllll+99+lllljll8llpppl88@lljj(b3!33~~=",
+"%-%33!333bbbb8lllllll8",
+"%';33!33bb8lllllllll8",
+";'%33!33lllllllllll8",
+"%;'33!33llllllllll8",
+"%;'33'338llllllll8",
+"!!;33'33blllllll8",
+"{{]33;3338lllll8",
+",,,ee;eee38lll8",
+"+@+gg%ggg33bbbb",
+".#$ee)eee33333bb",
+"+$%33)3333333",
+"@$%33;3333333",
+"@$;33;33333333",
+".$%33'3333333",
+"+$%ff!ffff333",
+".*%ff!ffffff3",
+"+%>33!33333333333",
+".@,33!b3333333333",
+"+.+33!933333333333339+lllll(3llllll3(lllll+933333333333339!",
+"$$$339!9b33333333333339+ll(39llllll93(ll+93333333333333b9!933~~=",
+"'%~9339!!!9b3333333333333333llllllll3333333333333333bh!!!9b39~~!",
+"%''~9333b9!!!!9b333333333333(llllll(333333333333b9!!!!hb3339~~~]",
+"%'~~~+933333b9!!!9b3333333333(llll(3333333333b9!!!9b333339+~~~!;",
+"')~~~~~+9333333b9!!!9b33333333(ll(33333333b9!!!9b333339+~~~~~>!%",
+">%'%>~>~~~~+933333b9!!!9b333333((333333b9!!!9b333339+~~~~~~!~%!%",
+">%''>))>~~~~~~+933333b9!!!!9b333333b9!!!!9b333339+~~~~~~~!%!~>%]",
+"')~%>>;>''%~~~~~~{+933333b9!!!9bb9!!!9b333339+{,,,~~~~%~%!%!%>%!",
+"]]]]]]]]]]]]]]]]{{^^,+933333b9!!!!9b33339+]]]{{^,,~{{]]]]]]]]]]]",
+",,,,,,,,,,,,,,,,,,,^^^^^,+933333333339+^^^^^,^^^,,,,,,,,,^^^^^,,",
+".+.+...@@@@@+....,,,,,,,^^^^^+9339+,^^^^^,,,,,,,,..@@+@@@@_._@@@",
+"+++++++++++++++++++@...,,^^^^^^^^^^^^^^^^^,...@@++++++++++++++++"};
