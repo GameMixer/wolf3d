@@ -1,4 +1,5 @@
-static char	*desert_wall[] = {
+/* XPM */
+static char	*desert_ceil[] = {
 "64 64 18 1",
 " 	c #000000", /*  0 */
 ".	c #BC7848", /*  1 */

@@ -6,7 +6,7 @@
 /*   By: gderenzi <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/03/07 15:51:33 by gderenzi          #+#    #+#             */
-/*   Updated: 2017/03/07 16:25:54 by gderenzi         ###   ########.fr       */
+/*   Updated: 2017/08/08 19:57:50 by gderenzi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,23 +14,15 @@
 
 char	*ft_strndup(const char *src, size_t n)
 {
-	char	*result;
-	char	*newsrc;
-	char	*dest;
-	size_t	i;
+	char	*dst;
+	char	*cdst;
 
-	i = 0;
-	newsrc = (char *)src;
-	if ((result = (char *)malloc(sizeof(*src) * (n + 1))) == NULL)
-		return (NULL);
-	dest = result;
-	while (*newsrc != '\0' && i < n)
-	{
-		*dest = *newsrc;
-		dest++;
-		newsrc++;
-		i++;
-	}
-	*dest = '\0';
-	return (result);
+	if (!(dst = ft_strnew(n + 1)))
+		return (0);
+	cdst = dst;
+	n++;
+	while (--n > 0)
+		*dst++ = *src++;
+	*dst = '\0';
+	return (cdst);
 }

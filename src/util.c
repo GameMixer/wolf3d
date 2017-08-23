@@ -6,57 +6,71 @@
 /*   By: gderenzi <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/26 14:48:23 by gderenzi          #+#    #+#             */
-/*   Updated: 2017/06/26 18:34:14 by gderenzi         ###   ########.fr       */
+/*   Updated: 2017/08/22 00:09:40 by gderenzi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "wolf3d.h"
 
-void	move(t_mlx *mlx, int vdir, int hdir)
+int		quit(t_mlx *mlx)
 {
-	double	x;
-	double	y;
-
-	if (vdir && hdir)
-	{
-		x = mlx->x + (vdir * hdir * cos(mlx->angle - ((M_PI / 4) * hdir)) * 0.15);
-		y = mlx->y + (vdir * hdir * sin(mlx->angle - ((M_PI / 4) * hdir)) * 0.15);
-	}
-	else if (vdir && !hdir)
-	{
-		x = mlx->x + (vdir * cos(mlx->angle) * 0.15);
-		y = mlx->y + (vdir * sin(mlx->angle) * 0.15);
-	}
-	else
-	{
-		x = mlx->x + (hdir * cos(mlx->angle - ((M_PI / 2) * hdir)) * 0.15);
-		y = mlx->y + (hdir * sin(mlx->angle - ((M_PI / 2) * hdir)) * 0.15);
-	}
-	if (mlx->map[(int)x][(int)y] != '0')
-	{
-		if (mlx->map[(int)mlx->x][(int)y] == '0')
-			mlx->y = y;
-		else if (mlx->map[(int)x][(int)mlx->y] == '0')
-			mlx->x = x;
-	}
-	else
-	{
-		mlx->x = x;
-		mlx->y = y;
-	}
-}
-
-double	pythag(double a, double b)
-{
-	double	c;
-
-	c = (a * a) + (b * b);
-	c = sqrt(c);
-	return (c);
-}
-
-int		draw_reload(t_mlx *mlx)
-{
-	mlx_put_image_to_window(mlx->ptr, mlx->win, mlx->screen.ptr, 0, 0);
+	mlx_destroy_window(mlx->ptr, mlx->win);
+	exit(1);
 	return (0);
+}
+
+int		jump(t_mlx *mlx)
+{
+	if (mlx->p.jump < 15 && mlx->p.h <= mlx->map.ceiling[(int)mlx->p.y / BLOCK]
+			[(int)mlx->p.x / BLOCK])
+		mlx->p.z += GRAVITY + (8 - (mlx->p.jump += 1));
+	if (mlx->p.z == mlx->map.floor[(int)(mlx->p.y / BLOCK)]
+			[(int)(mlx->p.x / BLOCK)])
+	{
+		mlx->p.jump = 0;
+		return (0);
+	}
+	return (1);
+}
+
+void	gravity(t_mlx *mlx)
+{
+	if (mlx->map.floor[(int)floor(mlx->p.y / BLOCK)]
+			[(int)floor(mlx->p.x / BLOCK)] < mlx->p.z)
+		mlx->p.z -= GRAVITY;
+	if (mlx->map.floor[(int)floor(mlx->p.y / BLOCK)]
+			[(int)floor(mlx->p.x / BLOCK)] > mlx->p.z)
+		mlx->p.z = mlx->map.floor[(int)floor(mlx->p.y / BLOCK)]
+			[(int)floor(mlx->p.x / BLOCK)];
+	mlx->p.h = mlx->p.z + 31 + (cos(mlx->p.bob += 0.15) * 2) +
+		(mlx->p.event[5] == 1 ? -16 : 0);
+}
+
+void	pre_compute(t_mlx *mlx, double ray)
+{
+	mlx->precomp.a = ray;
+	mlx->precomp.a += (mlx->precomp.a < 0 ? 360 : 0);
+	mlx->precomp.a += (mlx->precomp.a > 360 ? -360 : 0);
+	mlx->precomp.rad_a = ray / 180.0 * M_PI;
+	mlx->precomp.tan_a = tan(mlx->precomp.rad_a);
+	mlx->precomp.mapw = mlx->map.w * BLOCK;
+	mlx->precomp.maph = mlx->map.h * BLOCK;
+	mlx->precomp.playx = mlx->p.x;
+	mlx->precomp.playy = mlx->p.y;
+	mlx->precomp.playa = mlx->p.a;
+	mlx->precomp.distort = (cos((mlx->precomp.playa - mlx->precomp.a)
+				/ 180 * M_PI)) / SCALE;
+}
+
+int		linelen(char *buff, int k)
+{
+	int		len;
+
+	len = 0;
+	while (buff[k] != '\n' && buff[k] != '\0')
+	{
+		k++;
+		len++;
+	}
+	return (++len);
 }

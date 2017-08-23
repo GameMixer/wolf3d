@@ -5,102 +5,134 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: gderenzi <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/06/23 12:49:52 by gderenzi          #+#    #+#             */
-/*   Updated: 2017/06/23 13:45:01 by gderenzi         ###   ########.fr       */
+/*   Created: 2017/07/11 13:59:58 by gderenzi          #+#    #+#             */
+/*   Updated: 2017/08/08 17:50:59 by gderenzi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "wolf3d.h"
 
-double	calc_kx(t_mlx *mlx, t_prec vector)
+int		calc_floor(t_vlst **list, t_mlx *mlx, int wallf, int bot)
 {
-	int		x;
-	int		y;
-	int		fix;
-	double	k;
-	double	kx;
-
-	k = 9000;
-	x = 0;
-	while (x < MAP_W)
+	(**list).floorbot = (mlx->scr.center + ((mlx->p.h * mlx->scr.dist) /
+				(**list).vector.dist) / 2);
+	(**list).floortop = (**list).floorbot - (((mlx->p.h * mlx->scr.dist) /
+				(**list).vector.dist) * (wallf / mlx->p.h) / 2);
+	(**list).floorbot = bot;
+	if ((**list).floorbot > mlx->hf)
 	{
-		fix = (vector.x < 0) * -1;
-		kx = (x - mlx->x) / vector.x;
-		y = mlx->y + kx * vector.y;
-		if (kx >= 0 && y >= 0 && y < MAP_H &&
-				mlx->map[x + fix][y] != '0' && kx < k)
-			k = kx;
-		x++;
+		(**list).floorsv = (**list).floorbot - mlx->hf;
+		(**list).floorbot = mlx->hf;
 	}
-	return (k);
+	if ((**list).floortop < mlx->hc)
+	{
+		(**list).floorev = mlx->hc - (**list).floortop;
+		(**list).floortop = mlx->hc;
+	}
+	if ((**list).floortop < mlx->hf)
+		return ((**list).floortop);
+	return (mlx->hf);
 }
 
-double	calc_ky(t_mlx *mlx, t_prec vector)
+int		calc_ceil(t_vlst **list, t_mlx *mlx, int wallc, int bot)
 {
-	int		x;
-	int		y;
-	int		fix;
-	double	k;
-	double	ky;
-
-	k = 9000;
-	y = 0;
-	while (y < MAP_H)
+	(**list).ceilbot = (mlx->scr.center + ((mlx->p.h * mlx->scr.dist) /
+				(**list).vector.dist) / 2);
+	(**list).ceiltop = (**list).ceilbot - (((mlx->p.h * mlx->scr.dist) /
+				(**list).vector.dist) * (wallc / mlx->p.h) / 2);
+	(**list).ceilbot = bot;
+	if ((**list).ceilbot < mlx->hc)
 	{
-		fix = (vector.y < 0) * -1;
-		ky = (y - mlx->y) / vector.y;
-		x = mlx->x + ky * vector.x;
-		if (ky >= 0 && x >= 0 && x < MAP_W &&
-				mlx->map[x][y + fix] != '0' && ky < k)
-			k = ky;
-		y++;
+		(**list).ceilsv = mlx->hc - (**list).ceilbot;
+		(**list).ceilbot = mlx->hc;
 	}
-	return (k);
+	if ((**list).ceiltop > mlx->hf)
+	{
+		(**list).ceilev = (**list).ceiltop - mlx->hf;
+		(**list).ceiltop = mlx->hf;
+	}
+	if ((**list).ceiltop > mlx->hc)
+		return ((**list).ceiltop);
+	return (mlx->hc);
 }
 
-void	calc_side_and_texture(t_mlx *mlx, int x, t_prec vector)
+int		calc_wfloor(t_vlst **list, t_mlx *mlx, int *wallf, int *fbot)
 {
-	int		xflag;
-	t_prec	decimal;
-	t_prec	k;
-	t_point	fix;
-
-	mlx->k = calc_kx(mlx, vector);
-	if (mlx->k > (k.y = calc_ky(mlx, vector)))
+	(**list).wfloorbot = (mlx->scr.center + ((mlx->p.h * mlx->scr.dist) /
+				(**list).vector.dist) / 2);
+	*wallf = mlx->map.floor[(int)floor(((**list).vector.y) / BLOCK)]
+		[(int)floor(((**list).vector.x) / BLOCK)];
+	(**list).wallf = *wallf;
+	(**list).wfloortop = (**list).wfloorbot - (((mlx->p.h * mlx->scr.dist) /
+				(**list).vector.dist) * (*wallf / mlx->p.h) / 2);
+	if ((**list).wfloorbot > mlx->hf)
 	{
-		mlx->k = k.y;
-		xflag = 0;
+		(**list).wfloorsv = (**list).wfloorbot - mlx->hf;
+		(**list).wfloorbot = mlx->hf;
 	}
-	else
-		xflag = 1;
-	fix.x = (xflag == 1 && vector.x < 0) * -1;
-	fix.y = (xflag == 0 && vector.y < 0) * -1;
-	decimal.x = mlx->x + mlx->k * vector.x - (int)(mlx->x + mlx->k * vector.x);
-	decimal.y = mlx->y + mlx->k * vector.y - (int)(mlx->y + mlx->k * vector.y);
-	mlx->curr_w = mlx->wall[mlx->map[(int)(mlx->x + mlx->k * vector.x + fix.x)]
-		[(int)(mlx->y + mlx->k * vector.y + fix.y)] - '1'];
-	if (xflag)
-		draw_fill(mlx, x, WIN_H / (2 * mlx->k), decimal.y);
-	else
-		draw_fill(mlx, x, WIN_H / (2 * mlx->k), decimal.x);
+	if ((**list).wfloortop < mlx->hc)
+	{
+		(**list).wfloorev = mlx->hc - (**list).wfloortop;
+		(**list).wfloortop = mlx->hc;
+	}
+	*fbot = (**list).wfloortop;
+	if ((**list).wfloortop < mlx->hf)
+		return ((**list).wfloortop);
+	return (mlx->hf);
 }
 
-void	draw_wolf3d(t_mlx *mlx)
+int		calc_wceil(t_vlst **list, t_mlx *mlx, int *wallc, int *cbot)
 {
-	int		x;
-	double	x1;
-	double	y1;
-	t_prec	vector;
-
-	x = 0;
-	while (x < WIN_W)
+	(**list).wceilbot = (mlx->scr.center + ((mlx->p.h * mlx->scr.dist) /
+				(**list).vector.dist) / 2);
+	*wallc = mlx->map.ceiling[(int)floor(((**list).vector.y) / BLOCK)]
+		[(int)floor(((**list).vector.x) / BLOCK)];
+	(**list).wallc = *wallc;
+	(**list).wceiltop = (**list).wceilbot - (((mlx->p.h * mlx->scr.dist) /
+				(**list).vector.dist) * (*wallc / mlx->p.h) / 2);
+	(**list).wceilbot = (**list).wceiltop - (((mlx->p.h * mlx->scr.dist) /
+				(**list).vector.dist) * ((512 - *wallc) / mlx->p.h) / 2);
+	if ((**list).wceilbot < mlx->hc)
 	{
-		y1 = 1.0 * (WIN_W / 2 - x) / WIN_W;
-		x1 = 0.5 * cos(mlx->angle) - y1 * sin(mlx->angle) + mlx->x;
-		y1 = 0.5 * sin(mlx->angle) + y1 * cos(mlx->angle) + mlx->y;
-		vector.x = x1 - mlx->x;
-		vector.y = y1 - mlx->y;
-		calc_side_and_texture(mlx, x, vector);
-		x++;
+		(**list).wceilsv = mlx->hc - (**list).wceilbot;
+		(**list).wceilbot = mlx->hc;
 	}
+	if ((**list).wceiltop > mlx->hf)
+	{
+		(**list).wceilev = (**list).wceiltop - mlx->hf;
+		(**list).wceiltop = mlx->hf;
+	}
+	*cbot = (**list).wceiltop;
+	if ((**list).wceiltop > mlx->hc)
+		return ((**list).wceiltop);
+	return (mlx->hc);
+}
+
+void	line_cleaner(t_mlx *mlx, t_vlst *vlst, int num)
+{
+	t_vlst	*list;
+
+	list = vlst;
+	mlx->line[num].iter = 0;
+	mlx->wall_f = mlx->map.floor[(int)floor(mlx->p.y / BLOCK)]
+		[(int)floor(mlx->p.x / BLOCK)];
+	mlx->wall_c = mlx->map.ceiling[(int)floor(mlx->p.y / BLOCK)]
+		[(int)floor(mlx->p.x / BLOCK)];
+	mlx->bot_f = mlx->scr.h;
+	mlx->bot_c = 0;
+	mlx->hf = mlx->scr.h;
+	mlx->hc = 0;
+	while (list && mlx->hf > mlx->hc)
+	{
+		list->hc = mlx->hc;
+		list->hf = mlx->hf;
+		mlx->hf = calc_floor(&list, mlx, mlx->wall_f, mlx->bot_f);
+		mlx->hc = calc_ceil(&list, mlx, mlx->wall_c, mlx->bot_c);
+		mlx->hf = calc_wfloor(&list, mlx, &mlx->wall_f, &mlx->bot_f);
+		mlx->hc = calc_wceil(&list, mlx, &mlx->wall_c, &mlx->bot_c);
+		mlx->line[num].iter++;
+		list = list->next;
+	}
+	if (vlst)
+		draw_line(mlx, vlst, num);
 }

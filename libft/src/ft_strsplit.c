@@ -6,65 +6,51 @@
 /*   By: gderenzi <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/02/28 16:23:41 by gderenzi          #+#    #+#             */
-/*   Updated: 2017/03/06 15:48:51 by gderenzi         ###   ########.fr       */
+/*   Updated: 2017/08/22 00:12:39 by gderenzi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-static char	*strdup_plus(char *start, char *end)
+static size_t	ft_count_words(char *s, char c)
 {
-	char *res;
-	char *iter;
+	size_t		nb_words;
 
-	if ((res = (char *)malloc(end - start + 1)) == NULL)
-		return (NULL);
-	iter = res;
-	while (start < end)
-		*iter++ = *start++;
-	*iter = '\0';
-	return (res);
-}
-
-static char	*skip_past_delim(char *s, char c)
-{
-	while (*s != '\0' && *s == c)
-		s++;
-	return (s);
-}
-
-static char	*skip_to_delim(char *s, char c)
-{
-	while (*s != '\0' && *s != c)
-		s++;
-	return (s);
-}
-
-char		**ft_strsplit(char const *s, char c)
-{
-	char	**result;
-	int		i;
-	char	*iter;
-
-	i = 0;
-	if (!s)
-		return (NULL);
-	iter = skip_past_delim((char *)s, c);
-	while (*iter != '\0')
+	while (*s && *s == c)
+		++s;
+	nb_words = (*s ? 1 : 0);
+	while (*s)
 	{
-		iter = skip_past_delim(skip_to_delim(iter, c), c);
-		i++;
+		if (*s == c && s[1] && s[1] != c)
+			++nb_words;
+		++s;
 	}
-	if ((result = (char **)malloc(sizeof(char *) * i + 1)) == NULL)
+	return (nb_words);
+}
+
+char			**ft_strsplit(char const *s, char c)
+{
+	size_t		nb_words;
+	char		*wrd_begin;
+	char		**result;
+
+	nb_words = ft_count_words((char *)s, c);
+	result = (char **)malloc(sizeof(char *) * (nb_words + 1));
+	if (!result)
 		return (NULL);
-	i = 0;
-	iter = skip_past_delim((char *)s, c);
-	while (*iter != '\0')
+	wrd_begin = (char *)s;
+	while (*s)
 	{
-		result[i++] = strdup_plus(iter, skip_to_delim(iter, c));
-		iter = skip_to_delim(iter, c);
-		iter = skip_past_delim(iter, c);
+		if (*s == c)
+		{
+			if (wrd_begin != s)
+				*(result++) = ft_strsub(wrd_begin, 0, s - wrd_begin);
+			wrd_begin = (char *)s + 1;
+		}
+		++s;
 	}
-	result[i] = NULL;
-	return (result);
+	if (wrd_begin != s)
+		*(result++) = ft_strsub(wrd_begin, 0, s - wrd_begin);
+	*result = NULL;
+	return (result - nb_words);
 }

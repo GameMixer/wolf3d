@@ -6,101 +6,148 @@
 /*   By: gderenzi <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/23 13:45:10 by gderenzi          #+#    #+#             */
-/*   Updated: 2017/06/26 16:33:09 by gderenzi         ###   ########.fr       */
+/*   Updated: 2017/08/08 18:17:58 by gderenzi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "wolf3d.h"
 
-void			draw_pixel(t_mlx *mlx, int x, int y, unsigned int color)
+void	draw_wallf(t_mlx *mlx, t_vlst *list, int num)
 {
-	int				i;
-	int				dest;
-	unsigned int	new_color;
+	double	pas;
 
-	new_color = mlx_get_color_value(mlx->ptr, color);
-	dest = y * mlx->screen.s_line + x * mlx->screen.bits;
-	i = 0;
-	while (i < mlx->screen.bits)
+	pas = ((double)BLOCK / ((list->wfloorbot + list->wfloorsv) -
+				(list->wfloortop - list->wfloorev)));
+	pas *= ((double)list->wallf / BLOCK);
+	mlx->x = (list->wfloorsv * pas);
+	mlx->curr_t = mlx->map.texture[(int)floor(list->vector.y / BLOCK)]
+		[(int)floor(list->vector.x / BLOCK)] * 4 + 1;
+	mlx->pixel = list->wfloorbot;
+	while (mlx->pixel >= list->wfloortop)
 	{
-		if (mlx->screen.endian == 0)
-			mlx->screen.data[dest + i] = new_color >> (i << 3) & 0xFF;
-		else
-			mlx->screen.data[dest + i] = new_color
-				>> (mlx->screen.bits - ((i + 1) << 3)) & 0xFF;
-		i++;
-	}
-}
-
-void			draw_texture(t_mlx *mlx, t_img *img, t_point p, t_point w)
-{
-	int		i;
-	int		src;
-	int		dest;
-	int		curr;
-
-	src = w.y * img->s_line + w.x * img->bits;
-	dest = p.y * mlx->screen.s_line + p.x * mlx->screen.bits;
-	i = 0;
-	while (i < img->bits)
-	{
-		if (mlx->k >= 1.0)
+		mlx->x += (mlx->x > 64.0 ? -64.0 : 0);
+		if (mlx->pixel < mlx->scr.h && mlx->pixel >= 0
+				&& mlx->x >= 0 && mlx->x <= 64)
 		{
-			curr = img->data[src + i];
-			curr += (curr < 0 ? 0xFF : 0);
-			curr *= (1.0 / mlx->k);
-			curr = (curr > 0xFF ? 0xFF : curr);
-			curr = (curr < 0 ? 0 : curr);
-			curr = (curr > 127 ? curr - 256 : curr);
-			mlx->screen.data[dest + i] = curr;
+			if (list->side == 'v')
+				render_pointwv(mlx, num, mlx->curr_t + 1);
+			else
+				render_pointwh(mlx, num, mlx->curr_t);
 		}
-		else
-			mlx->screen.data[dest + i] = img->data[src + i];
-		i++;
+		mlx->x += pas;
+		mlx->pixel -= 1;
 	}
 }
 
-unsigned int	dark_color(unsigned int color, int y)
+void	draw_wallc(t_mlx *mlx, t_vlst *list, int num)
 {
-	int		i;
-	double	k;
-	int		n_color[3];
+	double	pas;
 
-	k = 1.0 - (WIN_H - y) / (WIN_H / 2.0);
-	k = k / 3.0;
-	i = 0;
-	while (i < 3)
+	pas = ((double)BLOCK / ((list->wceiltop + list->wceilev) -
+				(list->wceilbot - list->wceilsv)));
+	pas *= ((512.0 - (double)list->wallc) / BLOCK);
+	mlx->x = 64 - (list->wceilsv * pas);
+	mlx->curr_t = mlx->map.texture[(int)floor(list->vector.y / BLOCK)]
+		[(int)floor(list->vector.x / BLOCK)] * 4 + 1;
+	mlx->pixel = list->wceilbot;
+	while (mlx->pixel <= list->wceiltop)
 	{
-		n_color[i] = (color >> ((2 - i) << 3)) & 0xFF;
-		n_color[i] = n_color[i] * k;
-		n_color[i] = (n_color[i] > 0xFF ? 0xFF : n_color[i]);
-		n_color[i] = (n_color[i] < 0 ? 0 : n_color[i]);
-		i++;
+		mlx->x += (mlx->x < 0 ? 64.0 : 0);
+		if (mlx->pixel < mlx->scr.h && mlx->pixel >= 0
+				&& mlx->x >= 0 && mlx->x <= 64)
+		{
+			if (list->side == 'v')
+				render_pointwv(mlx, num, mlx->curr_t + 1);
+			else
+				render_pointwh(mlx, num, mlx->curr_t);
+		}
+		mlx->x -= pas;
+		mlx->pixel += 1;
 	}
-	return ((n_color[0] << 16) + (n_color[1] << 8) + n_color[2]);
 }
 
-void			draw_fill(t_mlx *mlx, int x, int wall_size, double deci)
+void	draw_floor(t_mlx *mlx, t_vlst *list, int num)
 {
-	t_point	pos;
-	t_point	wall;
-	double	min_w;
-	double	max_w;
+	double	pasx;
+	double	pasy;
+	double	pas;
+	double	pasdist;
 
-	pos.x = x;
-	pos.y = 0;
-	min_w = WIN_H / 2.0 - wall_size;
-	max_w = WIN_H / 2.0 + wall_size;
-	while (pos.y < WIN_H)
+	pas = (list->floorbot + list->floorsv) - (list->floortop - list->floorev);
+	pasx = (-(mlx->x - list->vector.uvx)) / pas;
+	pasy = (-(mlx->y - list->vector.uvy)) / pas;
+	pasdist = (list->vector.dist - mlx->dist_f) / pas;
+	mlx->x += (list->floorsv * pasx);
+	mlx->y += (list->floorsv * pasy);
+	mlx->curr_t = mlx->map.texture[(int)floor(mlx->ay / BLOCK)]
+		[(int)floor(mlx->ax / BLOCK)] * 4;
+	mlx->pixel = list->floorbot;
+	mlx->distt = mlx->dist_f;
+	while (mlx->pixel >= list->floortop)
 	{
-		wall.x = deci * mlx->curr_w.x;
-		wall.y = ((double)(pos.y - min_w) / (max_w - min_w)) * mlx->curr_w.y;
-		if (pos.y < min_w)
-			draw_pixel(mlx, pos.x, pos.y, dark_color(0xFFFFFF, pos.y));
-		else if (pos.y < max_w)
-			draw_text(mlx, &mlx->curr_w, pos, wall);
-		else
-			draw_pixel(mlx, pos.x, pos.y, dark_color(0xFFFFFF, pos.y));
-		(pos.y)++;
+		if (mlx->pixel < mlx->scr.h && mlx->pixel >= 0 && mlx->x >= 0
+				&& mlx->x <= 64 && mlx->y >= 0 && mlx->y <= 64)
+			render_pointfc(mlx, num, mlx->curr_t);
+		mlx->distt += pasdist;
+		mlx->pixel -= 1;
+		mlx->x += pasx;
+		mlx->y += pasy;
+	}
+}
+
+void	draw_ceil(t_mlx *mlx, t_vlst *list, int num)
+{
+	double	pasx;
+	double	pasy;
+	double	pas;
+	double	pasdist;
+
+	pas = (list->ceiltop + list->ceilev) - (list->ceilbot - list->ceilsv);
+	pasx = (-(mlx->x - list->vector.uvx)) / pas;
+	pasy = (-(mlx->y - list->vector.uvy)) / pas;
+	pasdist = (list->vector.dist - mlx->dist_c) / pas;
+	mlx->x += (list->ceilsv * pasx);
+	mlx->y += (list->ceilsv * pasy);
+	mlx->curr_t = mlx->map.texture[(int)floor(mlx->ay / BLOCK)]
+		[(int)floor(mlx->ax / BLOCK)] * 4 + 3;
+	mlx->pixel = list->ceilbot;
+	mlx->distt = mlx->dist_c;
+	while (mlx->pixel <= list->ceiltop)
+	{
+		if (mlx->pixel < mlx->scr.h && mlx->pixel >= 0 && mlx->x >= 0
+				&& mlx->x <= 64 && mlx->y >= 0 && mlx->y <= 64)
+			render_pointfc(mlx, num, mlx->curr_t);
+		mlx->distt += pasdist;
+		mlx->pixel += 1;
+		mlx->x += pasx;
+		mlx->y += pasy;
+	}
+}
+
+void	draw_line(t_mlx *mlx, t_vlst *list, int num)
+{
+	int		n;
+
+	init_value(mlx, list->vector.dist);
+	n = mlx->line[num].iter;
+	while (list && n-- > 0)
+	{
+		mlx->dist = list->vector.dist;
+		mlx->x = mlx->vx;
+		mlx->y = mlx->vy;
+		draw_floor(mlx, list, num);
+		mlx->x = mlx->vx;
+		mlx->y = mlx->vy;
+		draw_ceil(mlx, list, num);
+		mlx->vx = (int)list->vector.x % 64;
+		mlx->vy = (int)list->vector.y % 64;
+		mlx->distt = list->vector.dist;
+		draw_wallf(mlx, list, num);
+		draw_wallc(mlx, list, num);
+		mlx->ax = list->vector.x;
+		mlx->ay = list->vector.y;
+		mlx->dist_c = list->vector.dist;
+		mlx->dist_f = list->vector.dist;
+		list = list->next;
 	}
 }

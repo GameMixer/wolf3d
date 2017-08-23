@@ -6,7 +6,7 @@
 /*   By: gderenzi <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/02/27 18:29:19 by gderenzi          #+#    #+#             */
-/*   Updated: 2017/03/21 15:01:46 by gderenzi         ###   ########.fr       */
+/*   Updated: 2017/08/21 20:12:19 by gderenzi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,7 @@ void				ft_lstiter(t_list *lst, void (*f)(t_list *elem));
 t_list				*ft_lstmap(t_list *lst, t_list *(*f)(t_list *elem));
 char				*ft_stpcpy(char *dst, const char *src);
 
+char				*ft_strdupfree(const char *s1);
 char				*ft_strrev(char *str);
 size_t				ft_countdigits(int n);
 void				*ft_print_memory(void *addr, size_t size);
@@ -109,7 +110,14 @@ char				*ft_itoa_base(int value, int base);
 void				ft_putnbr_base(int n, int base);
 void				ft_putnbr_base_fd(int n, int base, int fd);
 t_list				*ft_lstsort(t_list *lst, int (*cmp)(void *, void *));
+void				ft_lstpushback(t_list **lst, void const *content,
+						size_t content_size);
+int					ft_lstlen(t_list *lst);
 char				*ft_strjoin_char(char const *s1, char c);
+char				*ft_strjoin_free(char *s1, char *s2, char type);
 size_t				ft_strpos(char *src, char c);
+char				*ft_strmerge(char *a, char *b);
+t_list				*ft_lstnclear(t_list **begin_list, int nb);
+void				ft_strtab_free(char **tab);
 
 #endif

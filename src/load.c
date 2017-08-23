@@ -6,52 +6,80 @@
 /*   By: gderenzi <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/05/31 12:05:26 by gderenzi          #+#    #+#             */
-/*   Updated: 2017/06/26 16:15:42 by gderenzi         ###   ########.fr       */
+/*   Updated: 2017/08/22 00:07:16 by gderenzi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "wolf3d.h"
 
-void	load_img(t_mlx *mlx, t_img *img, char *path)
+void	load_path(t_mlx *mlx)
 {
-	img->ptr = mlx_xpm_file_to_image(mlx->ptr, path, &img->x, &img->y);
-	img->data = mlx_get_data_addr(img->ptr, &img->bits,
-			&img->s_line, &img->endian);
-	img->bits = img->bits >> 3;
-}
-
-void	load_wall(t_mlx *mlx)
-{
+	int		fd;
 	int		i;
-	char	*path[WALLS] = {"imgs/blue_wall.xpm", "imgs/brick_wall.xpm",
-	"imgs/desert_wall.xpm", "imgs/eagle_wall.xpm", "imgs/smooth_wall.xpm",
-	"imgs/stone_wall.xpm", "imgs/tile_wall.xpm", "imgs/wood_wall.xpm"};
+	char	*line;
 
+	fd = open("src/textures/sprite_list", O_RDONLY);
+	if (fd < 0)
+		error_texture();
 	i = 0;
-	while (i < WALLS)
+	while (get_next_line(fd, &line) == 1)
 	{
-		load_img(mlx, &mlx->wall[i], path[i]);
+		mlx->file[i] = line;
 		i++;
 	}
 }
 
-void	load_all(t_mlx *mlx)
+void	load_texture(t_mlx *mlx)
 {
 	int		i;
-	//t_img	load;
 
-	mlx->x = 30.5;
-	mlx->y = 8.5;
-	mlx->angle = 4.7;
+	mlx->tex = (t_img *)malloc(sizeof(t_img) * TEXTURES);
+	mlx->file = (char **)malloc(sizeof(char *) * TEXTURES);
+	load_path(mlx);
 	i = 0;
-	while (i < EVENTS)
+	while (i < TEXTURES)
 	{
-		mlx->event[i] = 0;
+		mlx->tex[i].ptr = mlx_xpm_file_to_image(mlx->ptr, mlx->file[i],
+				&mlx->tex[i].w, &mlx->tex[i].h);
+		if (mlx->tex[i].ptr == NULL)
+			error_texture();
+		mlx->tex[i].data = (unsigned char *)mlx_get_data_addr(mlx->tex[i].ptr,
+				&mlx->tex[i].bits, &mlx->tex[i].size, &mlx->tex[i].endian);
 		i++;
 	}
-	mlx->screen.ptr = mlx_new_image(mlx->ptr, WIN_W, WIN_H);
-	mlx->screen.data = mlx_get_data_addr(mlx->screen.ptr, &mlx->screen.bits,
-			&mlx->screen.s_line, &mlx->screen.endian);
-	load_wall(mlx);
-	get_map(mlx->map);
+}
+
+int		load_map(t_mlx *mlx, char *file)
+{
+	int		fd;
+
+	fd = open(file, O_RDONLY);
+	if (fd < 0)
+		return (0);
+	map_set(mlx, fd, 0, 0);
+	return (1);
+}
+
+void	load_all(t_mlx *mlx, char *file)
+{
+	int		i;
+
+	if (!load_map(mlx, file))
+		error_map(0);
+	if (!(mlx->ptr = mlx_init()))
+		error_mlx();
+	i = 0;
+	mlx->scr.w = WIN_W;
+	mlx->scr.h = WIN_H;
+	mlx->win = mlx_new_window(mlx->ptr, mlx->scr.w, mlx->scr.h, mlx->map.name);
+	mlx->scr.angle_w = (double)FOV / mlx->scr.w;
+	mlx->scr.ptr = mlx_new_image(mlx->ptr, mlx->scr.w, mlx->scr.h);
+	mlx->scr.data = (unsigned char *)mlx_get_data_addr(mlx->scr.ptr,
+			&mlx->scr.bits, &mlx->scr.size, &mlx->scr.endian);
+	mlx->scr.dist = (mlx->scr.w / 2) / 0.57735026;
+	mlx->scr.center = mlx->scr.h / 2;
+	mlx->line = (t_line *)malloc(sizeof(t_line) * mlx->scr.w);
+	mlx->mousex = mlx->scr.w / 2;
+	mlx->mousey = mlx->scr.h / 2;
+	load_texture(mlx);
 }

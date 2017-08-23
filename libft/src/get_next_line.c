@@ -6,53 +6,130 @@
 /*   By: gderenzi <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/03/21 18:47:18 by gderenzi          #+#    #+#             */
-/*   Updated: 2017/03/24 16:25:50 by gderenzi         ###   ########.fr       */
+/*   Updated: 2017/08/07 14:26:57 by gderenzi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-t_list	*get_correct_file(t_list **file, int fd)
+static char		*get_append(t_gnl *gnl)
 {
-	t_list	*tmp;
+	int i;
 
-	tmp = *file;
-	while (tmp)
+	i = 0;
+	gnl->nl = 0;
+	while (gnl->i + i < gnl->count)
 	{
-		if ((int)tmp->content_size == fd)
-			return (tmp);
-		tmp = tmp->next;
+		if (gnl->buf[gnl->i + i] == '\n')
+		{
+			gnl->nl = 1;
+			i++;
+			break ;
+		}
+		i++;
 	}
-	tmp = ft_lstnew("\0", fd);
-	ft_lstadd(file, tmp);
-	tmp = *file;
-	return (tmp);
+	gnl->i += i;
+	return (ft_strsub(gnl->buf, gnl->i - i, i - gnl->nl));
 }
 
-int		get_next_line(const int fd, char **line)
+static t_gnl	*get_gnl(t_list **lst, int fd)
 {
-	char			buff[BUFF_SIZE + 1];
-	static t_list	*file;
-	int				ret;
-	t_list			*curr;
+	t_gnl	*gnl;
+	t_list	*temp;
 
-	if ((fd < 0 || line == NULL || read(fd, buff, 0) < 0))
-		return (-1);
-	curr = get_correct_file(&file, fd);
-	MALLCHECK((*line = ft_strnew(1)));
-	while ((ret = read(fd, buff, BUFF_SIZE)))
+	temp = *lst;
+	while (temp)
 	{
-		buff[ret] = '\0';
-		MALLCHECK((curr->content = ft_strjoin(curr->content, buff)));
-		if (ft_strchr(buff, '\n'))
-			break ;
+		gnl = (t_gnl *)(temp->content);
+		if (gnl->fd == fd)
+			return (gnl);
+		temp = temp->next;
 	}
-	if (ret < BUFF_SIZE && !ft_strlen(curr->content))
-		return (0);
-	*line = ft_strsub(curr->content, 0, ft_strpos(curr->content, '\n'));
-	if (ft_strpos(curr->content, '\n') < ft_strlen(curr->content))
-		curr->content += (ft_strpos(curr->content, '\n') + 1);
-	else
-		ft_strclr(curr->content);
-	return (1);
+	gnl = (t_gnl *)ft_memalloc(sizeof(t_gnl));
+	gnl->buf = ft_strnew(BUFF_SIZE);
+	gnl->count = BUFF_SIZE;
+	gnl->i = BUFF_SIZE;
+	gnl->fd = fd;
+	gnl->nl = 1;
+	temp = ft_lstnew(gnl, sizeof(t_gnl));
+	ft_memdel((void **)&gnl);
+	ft_lstadd(lst, temp);
+	return ((t_gnl *)(temp->content));
+}
+
+static void		del_gnl(t_list **lst, int fd, char **str)
+{
+	t_gnl	*gnl;
+	t_list	**temp;
+	t_list	*ptr;
+
+	temp = lst;
+	while (*temp)
+	{
+		gnl = (t_gnl *)((*temp)->content);
+		if (gnl->fd == fd)
+			break ;
+		*temp = ((*temp)->next);
+	}
+	if (*temp)
+	{
+		ptr = (*temp)->next;
+		ft_strdel(&(gnl->buf));
+		ft_memdel((void **)&gnl);
+		ft_memdel((void **)temp);
+		*temp = ptr;
+	}
+	ft_strdel(str);
+}
+
+static int		read_buffer(t_gnl *gnl, t_list **lst, char **temp, char **line)
+{
+	if (gnl->i == gnl->count)
+	{
+		gnl->count = read(gnl->fd, gnl->buf, BUFF_SIZE);
+		if (gnl->count == -1)
+		{
+			del_gnl(lst, gnl->fd, temp);
+			return (-1);
+		}
+		gnl->i = 0;
+		if (gnl->count == 0)
+		{
+			if (gnl->nl == 0)
+			{
+				*line = *temp;
+				return (1);
+			}
+		}
+	}
+	return (0);
+}
+
+int				get_next_line(int const fd, char **line)
+{
+	static t_list	*lst;
+	t_gnl			*gnl;
+	char			*temp;
+	int				ret;
+
+	if (fd < 0 || line == NULL)
+		return (-1);
+	gnl = get_gnl(&lst, fd);
+	temp = ft_strnew(0);
+	while (gnl->count > 0)
+	{
+		if ((ret = read_buffer(gnl, &lst, &temp, line)) != 0)
+			return (ret);
+		while (gnl->i < gnl->count)
+		{
+			temp = ft_strmerge(temp, get_append(gnl));
+			if (gnl->nl)
+			{
+				*line = temp;
+				return (1);
+			}
+		}
+	}
+	del_gnl(&lst, fd, &temp);
+	return (0);
 }

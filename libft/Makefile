@@ -6,7 +6,7 @@
 #    By: gderenzi <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2017/02/28 19:09:15 by gderenzi          #+#    #+#              #
-#    Updated: 2017/04/06 14:34:35 by gderenzi         ###   ########.fr        #
+#    Updated: 2017/08/21 20:12:36 by gderenzi         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,6 +23,7 @@ SRC			= ft_memset.c \
 				ft_memcmp.c \
 				ft_strcpy.c \
 				ft_strdup.c \
+				ft_strdupfree.c \
 				ft_strcat.c \
 				ft_strncat.c \
 				ft_strlcat.c \
@@ -68,7 +69,9 @@ SRC			= ft_memset.c \
 				ft_lstnew.c \
 				ft_lstdelone.c \
 				ft_lstdel.c \
+				ft_lstlen.c \
 				ft_lstadd.c \
+				ft_lstpushback.c \
 				ft_lstiter.c \
 				ft_lstmap.c \
 				ft_strrev.c \
@@ -94,7 +97,11 @@ SRC			= ft_memset.c \
 				ft_putnbr_base_fd.c \
 				ft_lstsort.c \
 				ft_strjoin_char.c \
+				ft_strjoin_free.c \
 				ft_strpos.c \
+				ft_strmerge.c \
+				ft_lstnclear.c \
+				ft_strtab_free.c \
 				get_next_line.c
 OBJ			= $(addprefix $(OBJDIR),$(SRC:.c=.o))
 
